@@ -12,9 +12,10 @@ from tabulate import tabulate
 loginUsername = None
 
 # /===== Data Model =====/
-flightHeaders = ["Flight ID", "Departure Time", "Arrival Time", "Departure Place", "Arrival Place", "Plane", "Flight Type", "Price"]
+flightHeaders = ["Flight ID", "Departure Time", "Arrival Time", "Flying From", "Heading To", "Plane", "Flight Type", "Price"]
 flightData = [
-    ["B-JAK-DEN-2026/09/24", " 2026/09/24 07:25", "24 September 2026 11:40", "Jakarta, Indonesia", "Denpasar, Indonesia", "Boeing 747", "Business", 6_500_000]
+    ["B-JAK-DEN-2026/09/24", "2026/09/24 07:25", "2026/09/24 11:40", "Jakarta, Indonesia", "Denpasar, Indonesia", "Boeing 747", "Business", 6_500_000],
+    ["E-JAK-BAN-2026/09/30", "2026/09/15 09:30", "2026/09/16 11:40", "Jakarta, Indonesia", "Bandung, Indonesia", "Airbus 300", "Economy", 3_000_000]
 ]
 
 # # "grid", "fancy_grid", "pipe", or "orgtbl" are popular formats
@@ -43,8 +44,8 @@ def add():
     newFlightArrDate = input("Arrival Date (YYYY/MM/DD): ")
     newFlightArrHour = input("Arrival Time (HH:MM, 24-hour scale): ")
     newFlightArrTime = newFlightArrDate + " " + newFlightArrHour
-    newFlightDepPlace = input("Departure Place (City, Country): ")
-    newFlightArrPlace = input("Arrival Place (City, Country): ")
+    newFlightDepPlace = input("Flying From (City, Country): ")
+    newFlightArrPlace = input("Heading To (City, Country): ")
     newFlightPlane = input("Plane Name: ")
     newFlightType = input("Flight Type (Economy/Business/First Class): ")
     newFlightPrice = int(input("Price (RP): "))
@@ -67,7 +68,43 @@ def add():
         return 0
 
 def edit():
-    pass
+    userInput = input("Enter flight ID: ")
+    for i in range(len(flightData)):
+        if flightData[i][0] == userInput:
+            print(tabulate([flightData[i]], headers=flightHeaders, tablefmt="grid"))
+            print()
+            print(f"Editing row index {i}:")
+            editFlightDepDate = input("Departure Date (YYYY/MM/DD): ")
+            editFlightDepHour = input("Departure Time (HH:MM, 24-hour scale): ")
+            editFlightDepTime = editFlightDepDate + " " + editFlightDepHour
+            editFlightArrDate = input("Arrival Date (YYYY/MM/DD): ")
+            editFlightArrHour = input("Arrival Time (HH:MM, 24-hour scale): ")
+            editFlightArrTime = editFlightArrDate + " " + editFlightArrHour
+            editFlightDepPlace = input("Flying From (City, Country): ")
+            editFlightArrPlace = input("Heading To (City, Country): ")
+            editFlightPlane = input("Plane Name: ")
+            editFlightType = input("Flight Type (Economy/Business/First Class): ")
+            editFlightPrice = int(input("Price (RP): "))
+            editFlightID = editFlightType.upper()[0] + "-" + editFlightDepPlace.upper()[:3] + "-" + editFlightArrPlace.upper()[:3] + "-" + editFlightDepDate
+
+            flightData[i] = [editFlightID, editFlightDepTime, editFlightArrTime, editFlightDepPlace, editFlightArrPlace, editFlightPlane, editFlightType, editFlightPrice]
+            print("Flight data altered.")
+            print(tabulate([flightData[i]], headers=flightHeaders, tablefmt="grid"))
+            print()
+
+            print("""
+            Menu:
+            1. Return to main menu
+            2. Exit program
+            """)
+            selectMenu = input("Select menu number:")
+            if selectMenu == "1":
+                print("Returning to main menu")
+            elif selectMenu == "2":
+                return 0
+        else:
+            print("Data not found.")
+
 
 def cancel():
     pass
@@ -163,6 +200,7 @@ def userPanel():
             book()
         elif userInput == "4":
             print("Exiting program.")
+            return 0
         else:
             print("Input is not valid !")
 
