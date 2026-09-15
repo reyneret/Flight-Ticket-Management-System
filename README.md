@@ -1,60 +1,58 @@
-# Python CRUD Application for [Business Domain]
+## Python CRUD Application for Flight Ticket Management System (NgeFly)
 
-A comprehensive Python application for managing [Data Entity] data with Create, Read, Update, and Delete (CRUD) operations.
+A comprehensive Python CLI application for managing flight schedules and passenger bookings with Create, Read, Update, and Delete (CRUD) operations.
 
 ## Business Understanding
 
-This project caters to the [Industry/Business Domain] industry, specifically addressing the need to manage [Data Entity] data efficiently. [Data Entity] plays a crucial role in [Explain the importance of data entity in business processes].
+This project caters to airline operations and travel agencies by providing a terminal-based solution for managing flight schedules. Efficient flight and booking management ensures accurate itinerary tracking, avoids schedule conflicts, and standardizes booking validation.
 
 **Benefits:**
 
-* Improved data accuracy and consistency
-* Streamlined data management processes
-* Enhanced decision-making through readily available data
-* ... (List additional benefits relevant to the business)
+* Improved schedule accuracy: Real-time flight tracking reduces scheduling errors and provides clear itinerary visibility.
+* Enhanced booking fulfillment: Structured booking collection and administrative review ensure smooth passenger processing.
+* Role-based workflow: Clear distinction between administrative controls and customer self-service actions.
+* Formatted data visualization: Tabular terminal outputs powered by `tabulate` simplify record inspection.
 
 **Target Users:**
 
-This application is designed for [Target Users] (e.g., sales representatives, inventory managers, customer support agents) within the organization to facilitate their [Tasks/Activities] related to [Data Entity].
+This application is designed for flight operations officers and airline administrative staff to manage flight inventory and ticket approvals, as well as customers looking to browse schedules, search flights, and reserve seats.
 
 ## Features
 
 * **Create:**
-    * Add new [Data Entity] entries with essential details like [List relevant fields].
-    * Implement validation rules to ensure data integrity (if applicable, e.g., unique identifiers, data type checks).
+    * Add new flight schedules with automatic unique Flight ID generation based on cabin class, origin, destination, and departure date (e.g., `B-JAK-DEN-2026/09/24`).
+    * Implement strict input validation for dates (`YYYY/MM/DD`), 24-hour departure/arrival times (`HH:MM`), locations (`City, Country`), flight cabin classes, and positive integer pricing.
+    * Prevent duplicate flight records before appending them to the database.
+    * Allow passengers to create ticket reservations with full name, date of birth, and email.
 * **Read:**
-    * Search and retrieve specific [Data Entity] records by applying filters based on [Searchable fields].
-    * Display comprehensive information for each [Data Entity] in a user-friendly format.
-    * Integrate pagination and sorting capabilities for large datasets (if applicable).
+    * Display all available flights in structured ASCII tables.
+    * Retrieve specific flights by unique Flight ID.
+    * Search flights dynamically across specific attributes (departure date, arrival date, origin, destination, aircraft model, flight class, or price).
+    * View passenger booking records and tracking statuses.
 * **Update:**
-    * Modify existing [Data Entity] data to reflect changes in [Attributes/Properties].
-    * Provide clear confirmation or error messages based on update success or failure.
+    * Modify existing flight attributes including schedule times, routes, aircraft model, cabin type, or ticket price.
+    * Provide a deep-copied preview of changes with explicit confirmation before saving updates.
+    * Review customer bookings with administrative approval and rejection controls.
 * **Delete:**
-    * Allow for the removal of unwanted [Data Entity] records with appropriate authorization checks (if applicable).
-    * Implement soft delete functionality to prevent permanent data loss (optional, depending on business needs).
-    * Consider offering data archiving capabilities (optional).
-* **Security:**
-    * Implement user authentication and authorization mechanisms (if sensitive data is involved) to control access to different CRUD operations.
-    * ... (Specify additional security features as needed)
-* **Reporting:**
-    * Generate reports or summaries based on [Data Entity] data to support [Business Functions] (optional).
-    * Export data in various formats (e.g., CSV, Excel) for further analysis (optional).
+    * Cancel and remove scheduled flights by Flight ID with confirmation prompts.
+* **Authentication & Access Control:**
+    * Gateway login supporting masked password entry via `pwinput`.
+    * Role separation directing `admin` to the administrative control suite and all other users to the passenger booking interface.
 
 ## Installation
 
 1. **Prerequisites:**
-    * Python version (specify the required version)
-    * Additional dependencies (list any required packages)
+    * Python version 3.7 or later
+    * Additional dependencies:
+        * `pip install tabulate`
+        * `pip install pwinput`
 
 2. **Installation:**
     ```bash
-    git clone https://github.com/<your-username>/<your-repo-name>.git
-    cd <your-repo-name>
-    pip install -r requirements.txt  # If using a requirements.txt file
+    git clone [https://github.com/reyneret/Flight-Ticket-Management-System.git](https://github.com/reyneret/Flight-Ticket-Management-System.git)
+    cd Flight-Ticket-Management-System
+    pip install tabulate pwinput
     ```
-
-3. **Database Setup (if applicable):**
-    Follow specific instructions for configuring your database connection, aligning with the business's chosen database management system.
 
 ## Usage
 
@@ -63,18 +61,33 @@ This application is designed for [Target Users] (e.g., sales representatives, in
     python main.py
     ```
 
-2. **CRUD Operations:**
-    * **Create:** Add a new [Data Entity] record, for example, a new customer in a customer management system, providing details like name, contact information, and preferences.
-    * **Read:** Search and retrieve customer information by name, ID, or other relevant criteria.
-    * **Update:** Modify customer details, such as updating their address or contact details.
-    * **Delete:** Remove a customer record from the system (with appropriate authorization, if applicable).
+2. **Authentication:**
+    * **Admin Access:** Login with username `admin` and password `123` to access flight scheduling, modification, cancellation, and booking moderation.
+    * **Passenger Access:** Enter any user credentials to browse flights, perform multi-attribute searches, and book tickets.
+
+3. **CRUD Operations:**
+    * **Create:** Add new flight itineraries (Admin) or reserve flight seats (User).
+    * **Read:** View complete flight tables, look up schedules by Flight ID, or search by route/date/type.
+    * **Update:** Edit flight details or process reservation approvals (`Approved` / `Denied`).
+    * **Delete:** Cancel scheduled flights from the system.
 
 ## Data Model
-This project utilizes a [Data Structure] (e.g., relational database, JSON documents) to represent [Data Entity] data. The following fields are typically stored:
-   * [Field 1]: (Data type) - Description of the field's purpose in the business context.
-   * [Field 2]: (Data type) - Description of the field's purpose in the business context.
-   * ... (List all relevant fields)
 
-## Contributing
-We welcome contributions to this project! Please feel free to open a pull request, sent to [your_email] or submit an issue if you encounter any problems or have suggestions for improvements.
+This project utilizes in-memory nested list structures to store flight and reservation data during runtime.
 
+* **Flight Data (`flightData`):**
+    * `Flight ID` (String, Unique): Auto-generated unique identifier (e.g., `B-JAK-DEN-2026/09/24`).
+    * `Departure Time` (String): Scheduled departure date and time (`YYYY/MM/DD HH:MM`).
+    * `Arrival Time` (String): Scheduled arrival date and time (`YYYY/MM/DD HH:MM`).
+    * `Flying From` (String): Origin location formatted as `City, Country`.
+    * `Heading To` (String): Destination location formatted as `City, Country`.
+    * `Plane` (String): Aircraft model name.
+    * `Flight Type` (String): Cabin class category (`Economy`, `Business`, or `First Class`).
+    * `Price` (Integer): Ticket price in Indonesian Rupiah (IDR).
+
+* **Booking Data (`bookList`):**
+    * `Booked Flight` (String): Flight ID associated with the reservation.
+    * `Full Name` (String): Passenger's full name.
+    * `Date of Birth` (String): Passenger's date of birth (`YYYY/MM/DD`).
+    * `Email` (String): Contact email address.
+    * `Approval` (String): Reservation status (`Waiting Approval`, `Approved`, or `Denied`).
