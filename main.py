@@ -14,6 +14,7 @@ import copy
 from datetime import datetime
 import re
 loginUsername = None
+waitList = []
 
 
 
@@ -344,7 +345,6 @@ def booking():
                 counterApproved = 0
                 counterDenied = 0
                 counterWaiting = 0
-                waitList = []
                 for i in range(len(bookList)):
                     if bookList[i][4] == "Waiting Approval":
                         counterWaiting += 1
@@ -372,16 +372,18 @@ def booking():
                         for i in range(len(waitList)):
                             print(f"Flight ID: {bookList[waitList[i]][0]}")
                             print(f"Full Name: {bookList[waitList[i]][1]}")
-                            print(f"Full Name: {bookList[waitList[i]][2]}")
-                            print(f"Full Name: {bookList[waitList[i]][3]}")
+                            print(f"Date of Birth: {bookList[waitList[i]][2]}")
+                            print(f"Email: {bookList[waitList[i]][3]}")
                             print()
                             approveCheck = input("Verdict (a/d): ")
                             if approveCheck == "a":
                                 bookList[waitList[i]][4] = "Approved"
+                                waitList.remove(waitList.index(i))
                                 subMenuCheck = False
                                 break
                             if approveCheck == "b":
                                 bookList[waitList[i]][4] == "Denied"
+                                waitList.remove(waitList.index(i))
                                 subMenuCheck = False
                                 break
                     elif selectSubMenu == "2":
@@ -534,8 +536,12 @@ def search():
 # /===== Main Program =====/
 
 def adminPanel():
+    msg = ""
+    if len(waitList) > 0:
+        msg = "! You have bookings awaiting approval !"
+
     while True:
-        print("""
+        print(f"""
         =====================================================
          __    _  _______  _______  _______  ___      __   __ 
         |  |  | ||       ||       ||       ||   |    |  | |  |
@@ -547,7 +553,7 @@ def adminPanel():
         ======================================================
                            ||ADMIN PANEL||
         
-        ! You have [n] bookings awaiting approval !
+        {msg}
         
         Menu:
         1. View flights
