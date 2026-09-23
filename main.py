@@ -25,25 +25,88 @@ flightData = [
     ["B-JAK-DEN-2026/09/24", "2026/09/24 07:25", "2026/09/24 11:40", "Jakarta, Indonesia", "Denpasar, Indonesia", "Boeing 747", "Business", 6_500_000],
     ["E-JAK-BAN-2026/09/30", "2026/09/15 09:30", "2026/09/16 11:40", "Jakarta, Indonesia", "Bandung, Indonesia", "Airbus 300", "Economy", 3_000_000]
 ]
-
 # Booking Data:
 bookHeaders = ["Booked Flight", "Full Name", "Date of Birth", "Email", "Approval"]
-bookList = []
+bookList = [
+    ["B-JAK-DEN-2026/09/24", "Doni Simatupang", "2002/03/21", "dontupang@gmail.com", "Approved"],
+    ["B-JAK-DEN-2026/09/24", "Jessica Kumala", "1999/07/14", "jessicakumala@yahoo.com", "Denied"]
+]
+
+
+
+# /===== Formatting Inputs =====/
+def inputDate(prompt="Date (YYYY/MM/DD): "):
+    while True:
+        val = input(prompt).strip()
+        try:
+            datetime.strptime(val, "%Y/%m/%d")
+            return val
+        except ValueError:
+            print(">> Invalid date. Use format YYYY/MM/DD (e.g. 2026/09/24).")
+
+
+def inputTime(prompt="Time (HH:MM, 24-hr): "):
+    while True:
+        val = input(prompt).strip()
+        try:
+            datetime.strptime(val, "%H:%M")
+            return val
+        except ValueError:
+            print(">> Invalid time. Use 24-hour format HH:MM (e.g. 14:30).")
+
+
+def inputLocation(prompt="Location (City, Country): "):
+    while True:
+        val = input(prompt).strip()
+        if re.match(r"^[^,]+,\s*[^,]+$", val):
+            return val.title()
+        print(">> Invalid format. Must be 'City, Country' (e.g. Jakarta, Indonesia).")
+
+
+def inputPlane(prompt="Plane Name: "):
+    while True:
+        val = input(prompt).strip()
+        if val:
+            return val
+        print(">> Plane name cannot be empty.")
+
+
+def inputFlightType(prompt="Flight Type (Economy/Business/First Class): "):
+    valid = {"economy", "business", "first class"}
+    while True:
+        val = input(prompt).strip().lower()
+        if val in valid:
+            return val.title()
+        print(">> Invalid type. Options: Economy, Business, First Class.")
+
+
+def inputPrice(prompt="Price (RP): "):
+    while True:
+        val = input(prompt).strip()
+        if val.isdigit() and int(val) > 0:
+            return int(val)
+        print(">> Price must be a whole number greater than 0.")
+
+
+def inputName(prompt="Full Name: "):
+    while True:
+        val = input(prompt).strip()
+        if len(val) >= 2:
+            return val.title()
+        print(">> Name must be at least 2 characters long.")
+
+
+def inputEmail(prompt="Email: "):
+    pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+    while True:
+        val = input(prompt).strip().lower()
+        if re.match(pattern, val):
+            return val
+        print(">> Invalid email address (e.g. user@example.com).")
 
 
 
 # /===== Feature Program =====/
-def isValid(prompt, validator, error):
-    while True:
-        val = input(prompt).strip()
-        try:
-            if validator(val):
-                return val
-        except (ValueError, IndexError):
-            pass
-        print(f">> Invalid format. {error}")
-
-
 def read():
     check = True
     while check:
@@ -52,19 +115,23 @@ def read():
         1. Display all flights
         2. Display specific flights
         3. Return to main menu
+
         """)
         selectMenu = input("Select menu number: ")
         if selectMenu == "1":
+            print()
             if flightData == None:
-                print("No flights available.")
+                print("\nNo flights available.\n")
             else:
                 print(tabulate(flightData, headers=flightHeaders, tablefmt="grid"))
                 print()
         elif selectMenu == "2":
+            print()
             checkMenu2 = True
             while checkMenu2:
                 found = False
                 searchID = input("Enter flight ID: ")
+                print()
                 for i in range(len(flightData)):
                     if flightData[i][0] == searchID:
                         print(tabulate([flightData[i]], headers=flightHeaders, tablefmt="grid"))
@@ -74,15 +141,16 @@ def read():
                 if found:
                     checkMenu2 = False
                 else:
-                    print("Flight not found")
+                    print("Flight not found\n")
                     tryAgain = input("Would you like to search again? (y/n): ")
+                    print()
                     if tryAgain == "n":
                         checkMenu2 = False
         
         elif selectMenu == "3":
             return 0
         else:
-            print("Option is not valid.")
+            print("\nOption is not valid.\n")
 
 
 def add():
@@ -91,92 +159,57 @@ def add():
         Menu:
         1. Add flight
         2. Return to main menu
+
         """)
-        selectMenu = input("Select menu number: ").strip()
+        selectMenu = input("Select menu number: ")
 
         if selectMenu == "1":
+            print()
             while True:
-                depDate = isValid(
-                    "Departure Date (YYYY/MM/DD): ",
-                    lambda x: datetime.strptime(x, "%Y/%m/%d"),
-                    "Use the format YYYY/MM/DD (Example: 2026/09/24)",
-                )
-                depHour = isValid(
-                    "Departure Time (HH:MM, 24-hour scale): ",
-                    lambda x: datetime.strptime(x, "%H:%M"),
-                    "Use the 24-hour format of HH:MM (Example: 21:30)",
-                )
-                arrDate = isValid(
-                    "Arrival Date (YYYY/MM/DD): ",
-                    lambda x: datetime.strptime(x, "%Y/%m/%d"),
-                    "Use the format YYYY/MM/DD (Example: 2026/09/24)",
-                )
-                arrHour = isValid(
-                    "Arrival Time (HH:MM, 24-hour scale): ",
-                    lambda x: datetime.strptime(x, "%H:%M"),
-                    "Use the 24-hour format HH:MM (Example: 21:30)",
-                )
-                depPlace = isValid(
-                    "Flying From (City, Country): ",
-                    lambda x: re.match(r"^[^,]+,\s*[^,]+$", x),
-                    "Use the format 'City, Country' (contoh: Berlin, Germany)",
-                )
-                arrPlace = isValid(
-                    "Heading To (City, Country): ",
-                    lambda x: re.match(r"^[^,]+,\s*[^,]+$", x),
-                    "Use the format 'City, Country' (contoh: Berlin, Germany)",
-                )
-                plane = isValid(
-                    "Plane Name: ",
-                    lambda x: len(x) > 0,
-                    "Name of the plane can't be empty",
-                )
-                valid_types = {"economy", "business", "first class"}
-                f_type_raw = isValid(
-                    "Flight Type (Economy/Business/First Class): ",
-                    lambda x: x.lower() in valid_types,
-                    "Types are only: Economy, Business, First Class",
-                )
-                f_type = f_type_raw.title()
-                price_str = isValid(
-                    "Price (RP): ",
-                    lambda x: int(x) > 0,
-                    "Price has to be an integer of more than 0",
-                )
-                price = int(price_str)
+                depDate = inputDate("Departure Date (YYYY/MM/DD): ")
+                depHour = inputTime("Departure Time (HH:MM, 24-hour scale): ")
+                arrDate = inputDate("Arrival Date (YYYY/MM/DD): ")
+                arrHour = inputTime("Arrival Time (HH:MM, 24-hour scale): ")
+                depPlace = inputLocation("Flying From (City, Country): ")
+                arrPlace = inputLocation("Heading To (City, Country): ")
+                plane = inputPlane()
+                flightType = inputFlightType()
+                price = inputPrice()
 
                 depTime = f"{depDate} {depHour}"
                 arrTime = f"{arrDate} {arrHour}"
-
                 depCode = depPlace.split(",")[0].strip().upper()[:3]
                 arrCode = arrPlace.split(",")[0].strip().upper()[:3]
-                newFlightID = f"{f_type[0].upper()}-{depCode}-{arrCode}-{depDate}"
+                newFlightID = f"{flightType[0].upper()}-{depCode}-{arrCode}-{depDate}"
 
                 isExist = any(f[0] == newFlightID for f in flightData)
                 if isExist:
-                    print(f"\nFlight dengan ID {newFlightID} sudah ada.")
+                    print(f"Flight with ID {newFlightID} already exists.\n")
                     tryAgain = input("Would you like to try again? (y/n): ").strip().lower()
+                    print()
                     if tryAgain == "y":
                         continue
                     break
 
-                newFlight = [newFlightID, depTime, arrTime, depPlace, arrPlace, plane, f_type, price]
+                newFlight = [newFlightID, depTime, arrTime, depPlace, arrPlace, plane, flightType, price]
                 print()
                 print(tabulate([newFlight], headers=flightHeaders, tablefmt="grid"))
                 print()
 
                 save = input("Save new flight? (y/n): ").strip().lower()
                 if save == "y":
+                    print()
                     flightData.append(newFlight)
                     print("Flight has been added.")
                 else:
+                    print()
                     print("Flight canceled.")
                 break
-
         elif selectMenu == "2":
+            print()
             return 0
         else:
-            print("Pilihan menu tidak valid.")
+            print("\nPilihan menu tidak valid.\n")
 
 
 def edit():
@@ -186,15 +219,17 @@ def edit():
         Menu:
         1. Edit flight
         2. Return to main menu
+
         """)
         selectMenu = input("Select menu number: ")
         if selectMenu == "1":
+            print()
             tempList = []
             checkMenu1 = True
             while checkMenu1:
-
                 editID = input("Enter flight ID: ")
-
+                print()
+                
                 isExist = False
                 i = 0
                 for i in range(len(flightData)):
@@ -207,8 +242,9 @@ def edit():
                     print(tabulate([flightData[i]], headers=flightHeaders, tablefmt="grid"))
                     proceedEdit = input("Proceed to edit? (y/n): ")
                     if proceedEdit == "y":
-                        newData = None
+                        print()
 
+                        newData = None
                         print("""
 Select which column to edit:
     1. Departure Date & Time
@@ -224,13 +260,14 @@ Select which column to edit:
                         while unvalidColumn:
                             selectCol = int(input("Select column number: "))
                             if (selectCol >= 1) & (selectCol <= 7):
+                                print()
                                 print(f"Changing {flightHeaders[selectCol]}")
                                 print(f"Current {flightHeaders[selectCol]}: {flightData[i][selectCol]}")
                                 newData = input(f"New {flightHeaders[selectCol]}: ")
                                 unvalidColumn = False
                                 break
                             else:
-                                print("Column number is not valid")
+                                print("\nColumn number is not valid\n")
 
                         tempList = copy.deepcopy(flightData)
                         tempList[i][selectCol] = newData
@@ -239,8 +276,11 @@ Select which column to edit:
                         print(tabulate([tempList[i]], headers=flightHeaders, tablefmt="grid"))
                         saveEdit = input("Save edit? (y/n): ")
                         if saveEdit == "n":
+                            print()
                             checkMenu1 = False
                             break
+                        else:
+                            print("\nFlight edit saved.\n")
 
                         flightData[i][selectCol] = newData
                         print("Flight data edited")
@@ -249,24 +289,29 @@ Select which column to edit:
                         break
 
                     elif proceedEdit == "n":
+                        print()
                         checkMenu1 = False
                         break   
                         
 
                 else:
                     print("Flight ID not found.")
+                    print()
                     tryAgain = input("Would you like to try again? (y/n): ")
                     if tryAgain == "y":
+                        print()
                         continue
                     elif tryAgain == "n":
+                        print()
                         break
 
 
         elif selectMenu == "2":
+            print()
             check = False
             return 0
         else:
-            print("Option is not valid.")
+            print("\nOption is not valid.\n")
 
 
 def cancel():
@@ -276,9 +321,11 @@ def cancel():
         Menu:
         1. Cancel flight
         2. Return to main menu
+
         """)
         selectMenu = input("Select menu number: ")
         if selectMenu == "1":
+            print()
             checkMenu1 = True
             while checkMenu1:
 
@@ -289,32 +336,33 @@ def cancel():
                 for i in range(len(flightData)):
                     if flightData[i][0] == deleteID:
                         isExist = True
+                        targetIdx = i
                         break
 
                 if isExist:
+                    print()
                     print("Current flight data:")
                     print(tabulate([flightData[i]], headers=flightHeaders, tablefmt="grid"))
+                    print()
                     proceedDelete = input("Proceed to delete? (y/n): ")
                     if proceedDelete == "y":
-                        clearRow = 0
-                        while clearRow == 0:
-                            for i in range(len(flightData)):
-                                if flightData[i][0] == deleteID:
-                                    clearRow = i
-                                    flightData.pop(clearRow)
-                                    print("Flight has been removed.")
-                                    checkMenu1 = False
-                                    break
+                        print()
+                        flightData.pop(targetIdx)
+                        print("Flight has been removed \n")
+                        checkMenu1 = False
+                        break
                     elif proceedDelete == "n":
                         checkMenu1 = False
                         break
                         
                 else:
-                    print("Flight ID not found.")
+                    print("\nFlight ID not found.\n")
                     tryAgain = input("Would you like to try again? (y/n): ")
                     if tryAgain == "y":
+                        print()
                         continue
                     if tryAgain == "n":
+                        print()
                         checkMenu1 = False
                         break
 
@@ -323,7 +371,7 @@ def cancel():
             check = False
             return 0
         else:
-            print("Option is not valid.")
+            print("\nOption is not valid.\n")
 
 
 def booking():
@@ -337,6 +385,7 @@ def booking():
         """)
         selectMenu = input("Select menu number: ")
         if selectMenu == "1":
+            print()
             checkMenu1 = True
             while checkMenu1:
                 print(tabulate(bookList, headers=bookHeaders, tablefmt="grid"))
@@ -363,43 +412,48 @@ def booking():
                 Menu:
                 1. Approve/Deny Booking
                 2. Return to Booking menu
+
                 """)
                 
                 subMenuCheck = True
                 while subMenuCheck:
                     selectSubMenu = input("Select menu number: ")
                     if selectSubMenu == "1":
-                        for i in range(len(waitList)):
-                            print(f"Flight ID: {bookList[waitList[i]][0]}")
-                            print(f"Full Name: {bookList[waitList[i]][1]}")
-                            print(f"Date of Birth: {bookList[waitList[i]][2]}")
-                            print(f"Email: {bookList[waitList[i]][3]}")
-                            print()
-                            approveCheck = input("Verdict (a/d): ")
-                            if approveCheck == "a":
-                                bookList[waitList[i]][4] = "Approved"
-                                waitList.remove(waitList.index(i))
-                                subMenuCheck = False
-                                break
-                            if approveCheck == "b":
-                                bookList[waitList[i]][4] == "Denied"
-                                waitList.remove(waitList.index(i))
-                                subMenuCheck = False
-                                break
+                        print()
+                        if counterWaiting > 0:
+                            for i in range(len(waitList)):
+                                print(f"Flight ID: {bookList[waitList[i]][0]}")
+                                print(f"Full Name: {bookList[waitList[i]][1]}")
+                                print(f"Date of Birth: {bookList[waitList[i]][2]}")
+                                print(f"Email: {bookList[waitList[i]][3]}")
+                                print()
+                                approveCheck = input("Verdict (a/d): ")
+                                if approveCheck == "a":
+                                    bookList[waitList[i]][4] = "Approved"
+                                    waitList.pop(i)
+                                    subMenuCheck = False
+                                    break
+                                if approveCheck == "d":
+                                    bookList[waitList[i]][4] = "Denied"
+                                    waitList.pop(i)
+                                    subMenuCheck = False
+                                    break
+                        else:
+                            print("\nThere are no bookings waiting for approval.\n")
+                            continue
                     elif selectSubMenu == "2":
                         checkMenu1 = False
                         subMenuCheck = False
                         break
                     else:
-                        print("Option is not valid.")
+                        print("\nOption is not valid.\n")
             
 
         elif selectMenu == "2":
             check = False
             break
         else:
-            print("Option is not valid.")
-
+            print("\nOption is not valid.\n")
 
 
 def book():
@@ -414,6 +468,7 @@ def book():
         """)
         selectMenu = input("Select menu number: ")
         if selectMenu == "1":
+            print()
             tempList = []
             checkMenu1 = True
             while checkMenu1:
@@ -428,45 +483,58 @@ def book():
                         break
 
                 if isExist:
+                    print()
                     bookNum = int(input("How many bookings will be done? "))
                     counter = 1
                     while bookNum > 0:
-                        bookName = input(f"Enter person {counter}'s full name: ")
-                        bookDOB = input(f"Enter person {counter}'s date of birth (YYYY/MM/DD): ")
-                        bookEmail = input(f"Enter person {counter}'s email: ")
+                        print()
+                        bookName = inputName(f"Enter person {counter}'s full name: ")
+                        bookDOB = inputDate(f"Enter person {counter}'s date of birth (YYYY/MM/DD): ")
+                        bookEmail = inputEmail(f"Enter person {counter}'s email: ")
                         print()
 
                         newBook = [bookID, bookName, bookDOB, bookEmail, "Waiting Approval"]
                         tempList.append(newBook)
-                        print(tabulate(tempList, headers=bookHeaders, tablefmt="grid"))
+                        print(tabulate([tempList[counter - 1]], headers=bookHeaders, tablefmt="grid"))
+                        print()
                         proceedBook = input("Are you sure to book? (y/n): ")
                         if proceedBook == "y":
+                            print()
                             bookList.append(newBook)
                             bookNum = bookNum - 1
                             counter = counter + 1
                         elif proceedBook == "n":
+                            print()
                             bookNum = bookNum - 1
+                            counter = counter + 1
+                            tempList.pop()
                             continue
-                    print("Booking finished.")
+                    print("\nBooking finished.\n")
                     checkMenu1 = False
                     break
                 else:
-                    print("Flight ID not found.")
+                    print("\nFlight ID not found.\n")
                     tryAgain = input("Would you like to try again? (y/n): ")
                     if tryAgain == "y":
+                        print()
                         continue
                     elif tryAgain == "n":
+                        print()
                         checkMenu1 = False
                         break
 
         elif selectMenu == "2":
+            print()
             print(tabulate(bookList, headers=bookHeaders, tablefmt="grid"))
+            print()
             continue
         elif selectMenu == "3":
+            print()
             check = False
             break
         else:
-            print("Option is not valid.")
+            print("\nOption is not valid.\n")
+
 
 def search():
     check = True
@@ -490,16 +558,17 @@ def search():
                 4. Heading To
                 5. Plane
                 6. Type
-                7. Price (Special)
+                7. Price
 
                 """)
                 checkSubMenu = True
                 while checkSubMenu:
                     selectSubMenu = int(input("Select menu number: "))
                     if (selectSubMenu >= 1) & (selectSubMenu <= 7):
+                        print()
                         print(f"Searching in {flightHeaders[selectSubMenu]}")
                         userSearch = input(f"Search {flightHeaders[selectSubMenu]}: ")
-                    
+
                         isExist = False
                         for i in range(len(flightData)):
                             if flightData[i][selectSubMenu] == userSearch:
@@ -509,38 +578,41 @@ def search():
                                 checkMenu1 = False
                     
                         if isExist:
-                            print("Search found.")
-                            print()
+                            print("\nSearch found.\n")
                             print(tabulate(tempList, headers=flightHeaders, tablefmt="grid"))
                             checkSubMenu = False
                             break
                         else:
-                            print("Search not found.")
+                            print("\nSearch not found.\n")
                             tryAgain = input("Would you like to try again? (y/n): ")
                             if tryAgain == "y":
+                                print()
                                 checkSubMenu = False
                                 break
                             elif tryAgain == "n":
+                                print()
                                 checkMenu1 = False
                                 break
                     else:
-                        print("Option is not valid.")
+                        print("\nOption is not valid.\n")
         elif selectMenu == "2":
+            print()
             check = False
             break
         else:
-            print("Option is not valid.")
+            print("\nOption is not valid.\n")
 
 
 
-# /===== Main Program =====/
-
+# /===== Admin Program =====/
 def adminPanel():
-    msg = ""
-    if len(waitList) > 0:
-        msg = "! You have bookings awaiting approval !"
-
     while True:
+        for i in bookList:
+            if i[4] == "Waiting Approval":
+                msg = "! You have bookings waiting approval !"
+            else:
+                msg = ""
+
         print(f"""
         =====================================================
          __    _  _______  _______  _______  ___      __   __ 
@@ -596,8 +668,6 @@ def adminPanel():
         
 
 
-
-
 # /===== User Program =====/
 def userPanel():
     while True:
@@ -640,6 +710,9 @@ def userPanel():
         else:
             print("Input is not valid !")
 
+
+
+# /===== Login =====/
 def loginGateway():
     print("""
         =====================================================
